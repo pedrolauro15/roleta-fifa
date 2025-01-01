@@ -39,7 +39,9 @@ const SpinWheel: React.FC<ISpinWheelProps> = ({
   const segColorArray = segments.map((segment) => segment.segColor)
   const segIconArray = segments.map((segment) => segment.icon)
   const textColorArray = segments.map((segment) => segment.textColor)
-  const iconCache: Record<string, HTMLImageElement> = {}
+  const [iconCache, setIconCache] = useState<Record<string, HTMLImageElement>>(
+    {},
+  )
 
   const [isStarted, setIsStarted] = useState<boolean>(false)
   const [needleText, setNeedleText] = useState<string>('')
@@ -58,22 +60,29 @@ const SpinWheel: React.FC<ISpinWheelProps> = ({
   const centerY = size
 
   useEffect(() => {
-    preloadIcons()
     wheelInit()
     setTimeout(() => {
       window.scrollTo(0, 1)
     }, 0)
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [iconCache])
+
+  useEffect(() => {
+    preloadIcons()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const preloadIcons = () => {
+    const cache = {} as Record<string, HTMLImageElement>
     segIconArray.forEach((iconSrc) => {
-      if (iconSrc && !iconCache[iconSrc]) {
+      if (iconSrc && !cache[iconSrc]) {
         const img = new Image()
         img.src = iconSrc
-        iconCache[iconSrc] = img
+        cache[iconSrc] = img
       }
     })
+    setIconCache(cache)
   }
 
   const wheelInit = () => {
