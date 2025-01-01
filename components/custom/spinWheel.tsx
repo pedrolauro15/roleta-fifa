@@ -3,9 +3,6 @@ import tickingSound from '@/assets/audio/spin-wheel-sound.mp3'
 import { ISpinWheelProps } from '@/models/wheel.interface'
 import { useEffect, useMemo, useState } from 'react'
 
-const ticTicSound: HTMLAudioElement | null =
-  typeof window !== 'undefined' ? new Audio(tickingSound) : new Audio()
-
 const SpinWheel: React.FC<ISpinWheelProps> = ({
   segments: segs,
   onFinished,
@@ -21,6 +18,11 @@ const SpinWheel: React.FC<ISpinWheelProps> = ({
   // showTextOnSpin = true,
   isSpinSound = true,
 }: ISpinWheelProps) => {
+  const ticTicSound: HTMLAudioElement | null = useMemo(
+    () =>
+      typeof window !== 'undefined' ? new Audio(tickingSound) : new Audio(),
+    [],
+  )
   function randomizeArray<T extends unknown[]>(arr: T) {
     for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1))
@@ -149,7 +151,7 @@ const SpinWheel: React.FC<ISpinWheelProps> = ({
       ticTicSound.pause()
       ticTicSound.currentTime = 0
     }
-  }, [needleText, isSpinSound, isStarted])
+  }, [ticTicSound, needleText, isSpinSound, isStarted])
 
   const wheelDraw = () => {
     if (!canvasContext) return

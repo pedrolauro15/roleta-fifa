@@ -1,5 +1,4 @@
 'use client'
-import SpinWheel from '@/components/custom/spinWheel'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -10,8 +9,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { teams } from '@/mock/teams'
+import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import { useState } from 'react'
+
+const SpinWheel = dynamic(() => import('@/components/custom/spinWheel'), {
+  loading: () => <p>Carregando...</p>,
+  ssr: false,
+})
 
 export default function Home() {
   const [team, setTeam] = useState<null | {
