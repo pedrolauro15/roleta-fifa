@@ -1,6 +1,7 @@
 'use client'
 import tickingSound from '@/assets/audio/spin-wheel-sound.mp3'
 import { ISpinWheelProps } from '@/models/wheel.interface'
+import NextImage from 'next/image'
 import { useEffect, useMemo, useState } from 'react'
 
 const SpinWheel: React.FC<ISpinWheelProps> = ({
@@ -11,8 +12,8 @@ const SpinWheel: React.FC<ISpinWheelProps> = ({
   buttonText = 'Spin',
   // isOnlyOnce = false,
   size = window.innerWidth > 700 ? 290 : 220,
-  upDuration = Math.round(Math.random() * 100),
-  downDuration = Math.round(Math.random() * 600),
+  upDuration = Math.min(Math.round(Math.random() * 100), 100),
+  downDuration = Math.min(Math.round(Math.random() * 600), 600),
   fontFamily = 'Poppins',
   arrowLocation = 'center',
   // showTextOnSpin = true,
@@ -39,10 +40,12 @@ const SpinWheel: React.FC<ISpinWheelProps> = ({
   const segColorArray = segments.map((segment) => segment.segColor)
   const segIconArray = segments.map((segment) => segment.icon)
   const textColorArray = segments.map((segment) => segment.textColor)
-  const iconCache: Record<string, HTMLImageElement> = {}
 
   const [isStarted, setIsStarted] = useState<boolean>(false)
   const [needleText, setNeedleText] = useState<string>('')
+  const currentNeedle = useMemo(() => {
+    return segments.find((seg) => seg.segmentText === needleText) || segments[0]
+  }, [needleText, segments])
 
   let currentSegment = ''
   let animationFrameId: number | null = null
@@ -62,20 +65,21 @@ const SpinWheel: React.FC<ISpinWheelProps> = ({
     setTimeout(() => {
       window.scrollTo(0, 1)
     }, 0)
-    preloadIcons()
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const preloadIcons = () => {
-    segIconArray.forEach((iconSrc) => {
-      if (iconSrc && !iconCache[iconSrc]) {
+  const iconCache = useMemo(() => {
+    const cache: Record<string, HTMLImageElement> = {}
+    for (const iconSrc of segIconArray) {
+      if (iconSrc && !cache[iconSrc]) {
         const img = new Image()
         img.src = iconSrc
-        iconCache[iconSrc] = img
+        cache[iconSrc] = img
       }
-    })
-  }
+    }
+    return cache
+  }, [segIconArray])
 
   const wheelInit = () => {
     initCanvas()
@@ -270,7 +274,26 @@ const SpinWheel: React.FC<ISpinWheelProps> = ({
     canvasContext.clearRect(0, 0, size * 2, size * 2)
   }
 
-  return <div id="wheel" className="wheel"></div>
+  return (
+    <div
+      style={{
+        background: currentNeedle.segColor,
+      }}
+      className="w-screen h-screen overflow-hidden flex items-center justify-center flex-col transition-colors"
+    >
+      <div className="absolute top-0 left-0 right-0 bottom-0 z-10 blur-md">
+        <NextImage
+          unoptimized
+          fill
+          src={currentNeedle.icon as string}
+          alt="Needle Image"
+        />
+      </div>
+      <div id="wheel" className="wheel z-20"></div>
+
+      <p>{needleText}</p>
+    </div>
+  )
 }
 
 export default SpinWheel
