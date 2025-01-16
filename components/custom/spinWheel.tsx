@@ -11,7 +11,7 @@ const SpinWheel: React.FC<ISpinWheelProps> = ({
   contrastColor = '#DDDDDD',
   buttonText = 'Spin',
   // isOnlyOnce = false,
-  size = window.innerWidth > 700 ? 290 : 220,
+  size = window.innerWidth > 700 ? 290 : 180,
   upDuration = Math.min(Math.round(Math.random() * 100), 100),
   downDuration = Math.min(Math.round(Math.random() * 600), 600),
   fontFamily = 'Poppins',
@@ -19,6 +19,7 @@ const SpinWheel: React.FC<ISpinWheelProps> = ({
   // showTextOnSpin = true,
   isSpinSound = true,
 }: ISpinWheelProps) => {
+  const isMobile = window.innerWidth < 700
   const ticTicSound: HTMLAudioElement | null = useMemo(
     () =>
       typeof window !== 'undefined' ? new Audio(tickingSound) : new Audio(),
@@ -183,13 +184,14 @@ const SpinWheel: React.FC<ISpinWheelProps> = ({
 
     if (iconSrc && iconCache[iconSrc]) {
       const img = iconCache[iconSrc]
-      const imgX = size / 1.18
-      const imgY = -20
+      const imgX = size / 1.17
+      const imgSize = isMobile ? 20 : 40
+      const imgY = (imgSize / 2) * -1
 
       ctx.save()
       ctx.translate(centerX, centerY)
       ctx.rotate((lastAngle + angle) / 2)
-      ctx.drawImage(img, imgX, imgY, 40, 40)
+      ctx.drawImage(img, imgX, imgY, imgSize, imgSize)
       ctx.restore()
     }
 
@@ -212,7 +214,7 @@ const SpinWheel: React.FC<ISpinWheelProps> = ({
     ctx.strokeStyle = primaryColor
     ctx.textBaseline = 'middle'
     ctx.textAlign = 'center'
-    ctx.font = '1em ' + fontFamily
+    ctx.font = `${isMobile ? '0.75em' : '1em'} ` + fontFamily
     for (let i = 1; i <= len; i++) {
       const angle = PI2 * (i / len) + angleCurrent
       drawSegment(i - 1, lastAngle, angle)
@@ -225,6 +227,7 @@ const SpinWheel: React.FC<ISpinWheelProps> = ({
     ctx.fillStyle = primaryColor
     ctx.fill()
     ctx.font = 'bold 1em ' + fontFamily
+
     ctx.fillStyle = contrastColor
     ctx.fillText(buttonText, centerX, centerY + 3)
 
@@ -287,11 +290,20 @@ const SpinWheel: React.FC<ISpinWheelProps> = ({
           fill
           src={currentNeedle.icon as string}
           alt="Needle Image"
+          className="object-cover"
         />
       </div>
       <div id="wheel" className="wheel z-20"></div>
 
-      <p>{needleText}</p>
+      <p
+        className="px-4 py-2 rounded text-sm transition-colors z-20"
+        style={{
+          background: currentNeedle.segColor + 'dd',
+          color: currentNeedle.textColor,
+        }}
+      >
+        {needleText}
+      </p>
     </div>
   )
 }
